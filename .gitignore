@@ -1,0 +1,7 @@
+/build/
+/venv/
+/async_attempt.py
+/async_pause.py
+/image_compare.py
+/unfreeze_gui_asyncio.py
+/widgets.py
