@@ -280,7 +280,12 @@ class App:
             if isinstance(_, dict):
 
                 self.results = _
-                self.populate_search_results()
+                self.populate_search_results()  # messy but it works
+                # tkinter: not multi-threading friendly
+                # generally only main Thread should make changes to widgets
+                # by periodically making updates using a Queue through after()
+                #
+                # at least ensure that Treeview (and related widgets) aren't used with loading while searching
 
             else:
                 self.progressbar['value'] = _
@@ -399,6 +404,10 @@ class App:
             del self.results['search_mode']
 
     def load_results(self):
+
+        if self.searching:
+            return
+
         self.tree.delete(*self.tree.get_children())
         fn = filedialog.askopenfilename(initialdir="/", initialfile="duplicate_results.data", title="Select file")
 
