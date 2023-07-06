@@ -5,3 +5,5 @@
 /image_compare.py
 /unfreeze_gui_asyncio.py
 /widgets.py
+/gui.spec
+/find_dupes_logs.log

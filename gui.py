@@ -198,12 +198,26 @@ class App:
         if folder:
             self.paths.append(folder)
 
+        self.clear_redundant_paths()
+
         for i in range(len(self.paths)):
             self.list_paths.insert(parent='', index='end', iid=str(i), text=self.paths[i], values=(self.paths[i],))
 
     def clear_paths(self):
         self.paths.clear()
         self.list_paths.delete(*self.list_paths.get_children())
+
+    def clear_redundant_paths(self):
+        cleared_paths = set(self.paths.copy())
+
+        for p in self.paths:
+            for p2 in self.paths:
+                if p == p2:
+                    continue
+                if p in p2:
+                    cleared_paths.remove(p2)
+
+        self.paths = list(cleared_paths)
 
     def on_delete_path(self, _event):
         if self.list_paths.selection():
@@ -336,7 +350,6 @@ class App:
                 self.search_button['state'] = 'normal'
 
     # TODO? add search for specific files / files from a dir (+show missing dupes)
-    # TODO avoid rescanning user input subdirectories (check substring among paths)
 
     def on_double_click(self, _event):
         self.open_location()
