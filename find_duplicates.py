@@ -1,9 +1,8 @@
 import os.path
 from os import scandir
 from os import path
-# from os import listdir  # faster but no check for file/dir like os.scandir()
-from PIL import Image, ImageFile
 import logging
+from PIL import Image, ImageFile
 
 
 LOG_FILE = 'find_dupes_logs.log'
@@ -186,6 +185,25 @@ def find_duplicate_images(paths4dupes, stop_event):
             del matches[key]
 
     yield matches
+
+
+def is_file_archive(file_path):
+    """
+    returns True for types: [zip, rar, 7z and tar] else False
+    """
+    return file_path.lower().endswith(('.zip', '.rar', '.7z', '.tar'))
+
+
+def list_contains_archive(dupe_list):
+    """
+    returns True for types: [zip, rar, 7z and tar] else False
+    :param dupe_list: a list of string paths
+    :return: True / False
+    """
+    for item in dupe_list:
+        if is_file_archive(item):
+            return True
+    return False
 
 
 def check_files_for_duplicates_by_name(_potentially_duped_files,

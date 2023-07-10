@@ -1,12 +1,13 @@
 import os
 import subprocess
 import threading
+import logging
+
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
 
-import find_duplicates
-import logging
+import find_duplicates as fd
 
 
 LOG_FILE = 'find_dupes_logs.log'
@@ -49,6 +50,12 @@ class App:
 
         self.right_frame = ttk.Frame(self.root, padding=10)
         self.right_frame.grid(row=0, column=1, sticky='n')
+
+        # STYLING
+        s = ttk.Style()
+        # s.theme_use('clam')
+        s.configure("Treeview", background="none")
+        s.map('Treeview', background=[('selected', 'green')])
 
         # LEFT FRAME WIDGETS
 
@@ -96,13 +103,17 @@ class App:
 
         self.no_ext = IntVar()
         self.check = ttk.Checkbutton(self.left_frame, text='ignore extensions (check for unpacked archives)',
-                                     variable=self.no_ext, onvalue=1, offvalue=0)
+                                     command=self.ignore_ext_changed, variable=self.no_ext, onvalue=1, offvalue=0)
         self.check.grid(row=2, column=0, sticky='w')
+
+        self.ignore_ext_label = ttk.Label(self.left_frame,
+                                          text='results with [zip, rar, 7z, tar] will be in light blue')
+        # self.ignore_ext_label.grid(row=3, column=0, sticky='w')
 
         # SEARCH TOOLBAR
 
         self.search_toolbar = ttk.Frame(self.left_frame)
-        self.search_toolbar.grid(row=3, column=0, sticky='w', pady=(20, 0))
+        self.search_toolbar.grid(row=4, column=0, sticky='w', pady=(20, 0))
 
         self.search_button = ttk.Button(self.search_toolbar, text="Search", command=self.search, width=20)
         self.search_button.grid(row=0, column=0, sticky='w')
@@ -122,7 +133,7 @@ class App:
         # IMPORT TOOLBAR
 
         self.import_toolbar = ttk.Frame(self.left_frame)
-        self.import_toolbar.grid(row=4, column=0, sticky='w', pady=(20, 0))
+        self.import_toolbar.grid(row=5, column=0, sticky='w', pady=(20, 0))
 
         ttk.Button(self.import_toolbar, text="Save results", command=self.save_results, width=20)\
             .grid(row=0, column=0, sticky='w')
@@ -133,7 +144,7 @@ class App:
         # LOGS TOOLBAR
 
         self.logs_toolbar = ttk.Frame(self.left_frame)
-        self.logs_toolbar.grid(row=5, column=0, sticky='w', pady=(40, 0))
+        self.logs_toolbar.grid(row=6, column=0, sticky='w', pady=(40, 0))
 
         ttk.Button(self.logs_toolbar, text="Open Logs", command=open_log, width=20) \
             .grid(row=0, column=0, sticky='w')
@@ -153,6 +164,8 @@ class App:
         self.tree.heading("#0", text="", anchor=W)
         self.tree.heading("filename", text="Filename", anchor=W)
         self.tree.heading("path", text="Path", anchor=CENTER)
+
+        self.tree.tag_configure('archive', background='lightblue')  # visual ease to identify results with archives
 
         self.tree.grid(row=0, column=0, sticky='wens')
 
@@ -232,8 +245,16 @@ class App:
     def set_checkbox(self, _event):
         if self.combo.get() == self.combo_items[0]:
             self.check.grid(row=2, column=0, sticky='w')
+            self.ignore_ext_changed()
         else:
             self.check.grid_forget()
+            self.ignore_ext_label.grid_forget()
+
+    def ignore_ext_changed(self):
+        if self.no_ext.get():
+            self.ignore_ext_label.grid(row=3, column=0, sticky='w')
+        else:
+            self.ignore_ext_label.grid_forget()
 
     def clear(self):
         self.results.clear()
@@ -279,13 +300,13 @@ class App:
     def search_run(self, mode, path):
 
         if mode == 'fi':
-            find_dupes = find_duplicates.find_duplicates_by_name(path, self.stop_event, True)
+            find_dupes = fd.find_duplicates_by_name(path, self.stop_event, True)
         elif mode == 'f':
-            find_dupes = find_duplicates.find_duplicates_by_name(path, self.stop_event)
+            find_dupes = fd.find_duplicates_by_name(path, self.stop_event)
         elif mode == 'fs':
-            find_dupes = find_duplicates.find_duplicates_by_name_and_size(path, self.stop_event)
+            find_dupes = fd.find_duplicates_by_name_and_size(path, self.stop_event)
         else:
-            find_dupes = find_duplicates.find_duplicate_images(path, self.stop_event)
+            find_dupes = fd.find_duplicate_images(path, self.stop_event)
 
         for _ in find_dupes:
 
@@ -320,7 +341,11 @@ class App:
 
         i = 0
         for dupe in self.results:
-            self.tree.insert(parent='', index='end', iid=i, text='', values=(dupe, ''))
+
+            if self.search_mode == 'fi' and fd.list_contains_archive(self.results[dupe]):
+                self.tree.insert(parent='', index='end', iid=i, text='', values=(dupe, ''), tags=('archive',))
+            else:
+                self.tree.insert(parent='', index='end', iid=i, text='', values=(dupe, ''))
 
             j = i + 1
             for d in self.results[dupe]:
