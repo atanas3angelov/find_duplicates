@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/find_duplicates.iml" filepath="$PROJECT_DIR$/.idea/find_duplicates.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../workspace-py/.idea/workspace-py.iml" filepath="$PROJECT_DIR$/../../workspace-py/.idea/workspace-py.iml" />
     </modules>
   </component>
 </project>

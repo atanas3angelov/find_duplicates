@@ -2,6 +2,7 @@ import os.path
 from os import scandir
 from os import path
 import logging
+
 from PIL import Image, ImageFile
 
 
