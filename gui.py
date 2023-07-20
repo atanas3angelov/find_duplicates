@@ -375,6 +375,9 @@ class App:
                 self.search_button['state'] = 'normal'
 
     # TODO? add search for specific files / files from a dir (+show missing dupes)
+    # TODO? add almost similar search for images (pixels at most {40} diff will be considered the same )
+    # TODO? add rotation similarity/duplication for images
+    # TODO ignore filename case (especially for extensions like .JPG and .jpg)
 
     def on_double_click(self, _event):
         self.open_location()
