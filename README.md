@@ -15,3 +15,6 @@ IDE: PyCharm Community
 
 Target OS: Windows (change the button handlers for other OS)  
 The executable in dist was created using pyinstaller.
+
+screenshot:
+![alt text](https://github.com/atanas3angelov/find_duplicates/blob/main/find_duplicates.jpg?raw=true)
